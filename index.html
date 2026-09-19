@@ -129,7 +129,7 @@ button{
 
 <input id="name" placeholder="Enter your name">
 
-<button onclick="createRoom()">➕ CREATE ROOM</button>
+<button onclick="createRoom()">➕ CREATE ROOM</button><button onclick="startOffline()">🎮 OFFLINE PLAY</button>
 
 <input id="joinCode" placeholder="Enter room code">
 
@@ -140,7 +140,21 @@ button{
 </div>
 
 
-<!-- ROOM -->
+<!-- OFFLINE GAME -->
+<div class="card" id="offlineArea" style="display:none">
+<h2>🎮 Offline Puzzle</h2>
+<h3>🧩 Level <span id="offlineLevel">1</span> / 10</h3>
+<div class="score">
+<span>⭐ Score: <b id="offlineScore">0</b></span>
+<span>⏱️ <b id="offlineTimer">30</b>s</span>
+</div>
+<div class="question" id="offlineQuestion"></div>
+<div id="offlineOptions"></div>
+<p id="offlineResult"></p>
+<button onclick="offlineNext()">➡️ NEXT LEVEL</button>
+<button onclick="offlineBack()">⬅️ BACK TO MENU</button>
+</div>
+\n<!-- ROOM -->
 <div class="card" id="roomArea">
 
 <h2>🏠 Room</h2>
@@ -616,7 +630,22 @@ document
 
 connect();
 
-</script>
+
+
+const offlineQuestions=[
+{q:"What has keys but cannot open locks?",options:["Door","Piano","Car","House"],answer:1},
+{q:"What has hands but cannot clap?",options:["Clock","Robot","Monkey","Tree"],answer:0},
+{q:"What gets wetter as it dries?",options:["Towel","Water","Soap","Sun"],answer:0},
+{q:"What has many teeth but cannot bite?",options:["Shark","Comb","Dog","Saw"],answer:1},
+{q:"What can travel around the world while staying in one corner?",options:["Stamp","Car","Plane","Clock"],answer:0},
+{q:"What has one eye but cannot see?",options:["Needle","Potato","Camera","Bird"],answer:0},
+{q:"What has a neck but no head?",options:["Bottle","Shirt","Snake","Tree"],answer:0},
+{q:"What goes up but never comes down?",options:["Rain","Age","Ball","Smoke"],answer:1},
+{q:"What has legs but cannot walk?",options:["Table","Dog","Human","Horse"],answer:0},
+{q:"What has a face and two hands but no arms or legs?",options:["Clock","Book","Chair","Phone"],answer:0}
+];
+let offlineIndex=0,offlineScoreValue=0,offlineAnswered=false,offlineTimerId=null,offflineTimeLeft=30;
+function startOffline(){document.getElementById("menu").style.display="none";document.getElementById("roomArea").style.display="none";document.getElementById("gameArea").style.display="none";document.getElementById("offlineArea").style.display="block";renderOfflineQuestion();}function renderOfflineQuestion(){clearInterval(offlineTimerId);offlineAnswered=false;offlineTimeLeft=30;const q=offlineQuestions[offlineIndex];document.getElementById("offlineLevel").innerText=offlineIndex+1;document.getElementById("offlineTimer").innerText=30;document.getElementById("offlineQuestion").innerText=q.q;document.getElementById("offlineResult").innerText="";const box=document.getElementById("offlineOptions");box.innerHTML="";q.options.forEach((option,i)=>{const b=document.createElement("button");b.innerText=String.fromCharCode(65+i)+") "+option;b.onclick=()=>offlineAnswer(i);box.appendChild(b)});offlineTimerId=setInterval(()=>{offlineTimeLeft--;document.getElementById("offlineTimer").innerText=offlineTimeLeft;if(offlineTimeLeft<=0){clearInterval(offlineTimerId);offlineAnswered=true;document.getElementById("offlineResult").innerText="⏰ Time Up! Correct answer: "+q.options[q.answer]}},1000)}function offlineAnswer(selected){if(offlineAnswered)return;offlineAnswered=true;clearInterval(offlineTimerId);const q=offlineQuestions[offlineIndex];if(selected===q.answer){offlineScoreValue+=10;document.getElementById("offlineScore").innerText=offlineScoreValue;document.getElementById("offlineResult").innerText="✅ Correct! +10"}else{document.getElementById("offlineResult").innerText="❌ Wrong! Correct answer: "+q.options[q.answer]}}function offlineNext(){if(!offlineAnswered){document.getElementById("offlineResult").innerText="⚠️ Pehle answer select karo!";return}if(offlineIndex>=offlineQuestions.length-1){document.getElementById("offlineResult").innerText="🏆 Game Complete! Final Score: "+offlineScoreValue;return}offlineIndex++;renderOfflineQuestion()}function offlineBack(){clearInterval(offlineTimerId);document.getElementById("offlineArea").style.display="none";document.getElementById("menu").style.display="block"}</script>
 
 </body>
 </html>
