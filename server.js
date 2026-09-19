@@ -1,11 +1,13 @@
+const http = require("http");
 const express = require("express");
-const app = express();
-app.use(express.static("."));
 const WebSocket = require("ws");
 
+const app = express();
+app.use(express.static("."));
+
 const PORT = process.env.PORT || 3000;
-const http = require("http");
-const server = http.createServer((req, res) => { res.writeHead(200, {"Content-Type":"text/plain"}); res.end("Puzzle Battle server running"); });
+
+const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 const rooms = new Map();
@@ -18,11 +20,9 @@ const MODES = {
 
 function roomCode() {
     let code;
-
     do {
         code = Math.floor(100000 + Math.random() * 900000).toString();
     } while (rooms.has(code));
-
     return code;
 }
 
@@ -80,7 +80,6 @@ wss.on("connection", (ws) => {
             });
         }
 
-        // CREATE ROOM
         if (data.type === "create") {
 
             if (player.room) {
@@ -118,7 +117,7 @@ wss.on("connection", (ws) => {
             send(ws, {
                 type: "room_created",
                 room: code,
-                mode: mode,
+                mode,
                 maxPlayers: MODES[mode].maxPlayers,
                 playerId: player.id
             });
@@ -126,7 +125,6 @@ wss.on("connection", (ws) => {
             sendRoomInfo(room);
         }
 
-        // JOIN ROOM
         else if (data.type === "join") {
 
             if (player.room) {
@@ -178,13 +176,11 @@ wss.on("connection", (ws) => {
             sendRoomInfo(room);
         }
 
-        // CHAT
         else if (data.type === "chat") {
 
             if (!player.room) return;
 
             const room = rooms.get(player.room);
-
             if (!room) return;
 
             const message = String(data.message || "")
@@ -200,13 +196,11 @@ wss.on("connection", (ws) => {
             });
         }
 
-        // START GAME
         else if (data.type === "start") {
 
             if (!player.room) return;
 
             const room = rooms.get(player.room);
-
             if (!room) return;
 
             const config = MODES[room.mode];
@@ -234,7 +228,6 @@ wss.on("connection", (ws) => {
         if (!player.room) return;
 
         const room = rooms.get(player.room);
-
         if (!room) return;
 
         room.players = room.players.filter(
@@ -249,4 +242,6 @@ wss.on("connection", (ws) => {
     });
 });
 
-server.listen(PORT, "0.0.0.0", () => { console.log(`🎮 Puzzle server running on port ${PORT}`); });
+server.listen(PORT, "0.0.0.0", () => {
+    console.log(`🎮 Puzzle server running on port ${PORT}`);
+});
