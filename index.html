@@ -213,8 +213,9 @@ What has keys but cannot open locks?
 
 <script>
 
-const SERVER = "wss://puzzle-games-3sgv.onrender.com";
-
+const SERVER = location.protocol === "https:"
+    ? `wss://${location.host}`
+    : `ws://${location.host}`;
 let socket;
 let selectedMode = "2v2";
 
