@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Puzzle Battle</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#111827;
+    color:white;
+}
+
+.container{
+    max-width:520px;
+    margin:auto;
+    padding:18px;
+}
+
+h1{text-align:center}
+
+.card{
+    background:#1f2937;
+    padding:16px;
+    border-radius:16px;
+    margin-bottom:15px;
+}
+
+input,button,select{
+    width:100%;
+    padding:13px;
+    margin:6px 0;
+    border-radius:10px;
+    border:0;
+    font-size:16px;
+}
+
+button{
+    background:#2563eb;
+    color:white;
+    font-weight:bold;
+}
+
+.mode{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+}
+
+.mode button{
+    background:#374151;
+}
+
+.mode button.selected{
+    background:#16a34a;
+}
+
+.status{
+    text-align:center;
+    font-weight:bold;
+}
+
+.player{
+    background:#374151;
+    padding:9px;
+    border-radius:8px;
+    margin:5px 0;
+}
+
+.chat{
+    height:180px;
+    overflow-y:auto;
+    background:#111827;
+    padding:10px;
+    border-radius:10px;
+}
+
+.msg{
+    margin:7px 0;
+}
+
+#roomArea,#gameArea{
+    display:none;
+}
+
+.score{
+    display:flex;
+    justify-content:space-between;
+    font-size:18px;
+}
+
+.question{
+    font-size:21px;
+    text-align:center;
+    margin:20px 0;
+}
+
+#roomCode{
+    font-size:24px;
+    text-align:center;
+    font-weight:bold;
+    letter-spacing:3px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🧩 PUZZLE BATTLE</h1>
+
+<!-- GAME MENU -->
+<div class="card" id="menu">
+
+<h2>🎮 Game Mode</h2>
+
+<div class="mode">
+    <button id="m1" onclick="selectMode('1v1')">1v1</button>
+    <button id="m2" onclick="selectMode('2v2')">2v2</button>
+    <button id="m3" onclick="selectMode('4v4')">4v4</button>
+</div>
+
+<p id="modeInfo">Select a mode</p>
+
+<input id="name" placeholder="Enter your name">
+
+<button onclick="createRoom()">➕ CREATE ROOM</button>
+
+<input id="joinCode" placeholder="Enter room code">
+
+<button onclick="joinRoom()">🚪 JOIN ROOM</button>
+
+<p class="status" id="status">🔴 Connecting...</p>
+
+</div>
+
+
+<!-- ROOM -->
+<div class="card" id="roomArea">
+
+<h2>🏠 Room</h2>
+
+<div id="roomCode"></div>
+
+<p id="roomMode"></p>
+
+<h3>👥 Players</h3>
+
+<div id="players">Waiting...</div>
+
+<button onclick="startGame()">▶️ START GAME</button>
+
+</div>
+
+
+<!-- GAME -->
+<div class="card" id="gameArea">
+
+<h2>🎮 Level <span id="level">1</span></h2>
+
+<div class="score">
+<span>⭐ Score: <b id="score">0</b></span>
+<span>⏱️ <b id="timer">30</b>s</span>
+</div>
+
+<div class="question">
+What has keys but cannot open locks?
+</div>
+
+<input id="answer" placeholder="Your answer">
+
+<button onclick="checkAnswer()">✅ SUBMIT</button>
+
+<p id="result"></p>
+
+</div>
+
+
+<!-- CHAT -->
+<div class="card">
+
+<h3>💬 Live Chat</h3>
+
+<div class="chat" id="chat"></div>
+
+<input id="message" placeholder="Type message">
+
+<button onclick="sendChat()">SEND</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+const SERVER = "ws://192.168.43.196:3000";
+
+let socket;
+let selectedMode = "2v2";
+
+let score = 0;
+let time = 30;
+let timerInterval;
+
+
+function selectMode(mode){
+
+    selectedMode = mode;
+
+    document.getElementById("m1").classList.remove("selected");
+    document.getElementById("m2").classList.remove("selected");
+    document.getElementById("m3").classList.remove("selected");
+
+    if(mode === "1v1"){
+        document.getElementById("m1").classList.add("selected");
+        document.getElementById("modeInfo").innerText =
+            "1v1 — 2 players";
+    }
+
+    if(mode === "2v2"){
+        document.getElementById("m2").classList.add("selected");
+        document.getElementById("modeInfo").innerText =
+            "2v2 — 4 players";
+    }
+
+    if(mode === "4v4"){
+        document.getElementById("m3").classList.add("selected");
+        document.getElementById("modeInfo").innerText =
+            "4v4 — 8 players";
+    }
+}
+
+
+selectMode("2v2");
+
+
+function connect(){
+
+    socket = new WebSocket(SERVER);
+
+    socket.onopen = function(){
+
+        document.getElementById("status").innerText =
+            "🟢 Server Connected";
+    };
+
+
+    socket.onclose = function(){
+
+        document.getElementById("status").innerText =
+            "🔴 Disconnected — reconnecting...";
+
+        setTimeout(connect,3000);
+    };
+
+
+    socket.onerror = function(){
+
+        document.getElementById("status").innerText =
+            "⚠️ Connection problem";
+    };
+
+
+    socket.onmessage = function(event){
+
+        const data = JSON.parse(event.data);
+
+
+        if(data.type === "room_created"){
+
+            showRoom(
+                data.room,
+                data.mode,
+                data.maxPlayers
+            );
+
+            addChat(
+                "SYSTEM",
+                "Room created: " + data.room
+            );
+        }
+
+
+        if(data.type === "joined"){
+
+            showRoom(
+                data.room,
+                data.mode,
+                data.maxPlayers
+            );
+
+            addChat(
+                "SYSTEM",
+                "Joined room: " + data.room
+            );
+        }
+
+
+        if(data.type === "room_info"){
+
+            showRoom(
+                data.room,
+                data.mode,
+                data.maxPlayers
+            );
+
+            showPlayers(data.players);
+        }
+
+
+        if(data.type === "players"){
+
+            showPlayers(data.players);
+        }
+
+
+        if(data.type === "chat"){
+
+            addChat(
+                data.player,
+                data.message
+            );
+        }
+
+
+        if(data.type === "game_start"){
+
+            startLevel();
+        }
+
+
+        if(data.type === "error"){
+
+            alert(data.message);
+        }
+
+    };
+}
+
+
+function createRoom(){
+
+    const name =
+        document.getElementById("name").value.trim()
+        || "Player";
+
+    if(socket.readyState !== WebSocket.OPEN){
+
+        alert("Server connected nahi hai");
+
+        return;
+    }
+
+
+    socket.send(JSON.stringify({
+
+        type:"create",
+
+        name:name,
+
+        mode:selectedMode
+
+    }));
+}
+
+
+function joinRoom(){
+
+    const name =
+        document.getElementById("name").value.trim()
+        || "Player";
+
+    const room =
+        document.getElementById("joinCode").value.trim();
+
+
+    if(!room){
+
+        alert("Room code enter karo");
+
+        return;
+    }
+
+
+    if(socket.readyState !== WebSocket.OPEN){
+
+        alert("Server connected nahi hai");
+
+        return;
+    }
+
+
+    socket.send(JSON.stringify({
+
+        type:"join",
+
+        name:name,
+
+        room:room
+
+    }));
+}
+
+
+function showRoom(room,mode,maxPlayers){
+
+    document.getElementById("menu").style.display =
+        "none";
+
+    document.getElementById("roomArea").style.display =
+        "block";
+
+
+    document.getElementById("roomCode").innerText =
+        room;
+
+
+    document.getElementById("roomMode").innerText =
+        "🎮 " + mode +
+        " • " +
+        maxPlayers +
+        " players required";
+}
+
+
+function showPlayers(players){
+
+    let html = "";
+
+    players.forEach(function(p,index){
+
+        html +=
+        '<div class="player">' +
+        (index + 1) +
+        ". " +
+        p.name +
+        " — Team " +
+        p.team +
+        "</div>";
+
+    });
+
+
+    document.getElementById("players").innerHTML =
+        html;
+}
+
+
+function startGame(){
+
+    if(socket.readyState !== WebSocket.OPEN){
+
+        alert("Server connected nahi hai");
+
+        return;
+    }
+
+
+    socket.send(JSON.stringify({
+
+        type:"start"
+
+    }));
+}
+
+
+function startLevel(){
+
+    document.getElementById("gameArea").style.display =
+        "block";
+
+
+    score = 0;
+    time = 30;
+
+
+    document.getElementById("score").innerText =
+        score;
+
+    document.getElementById("timer").innerText =
+        time;
+
+    document.getElementById("result").innerText = "";
+
+    document.getElementById("answer").value = "";
+
+
+    clearInterval(timerInterval);
+
+
+    timerInterval = setInterval(function(){
+
+        time--;
+
+        document.getElementById("timer").innerText =
+            time;
+
+
+        if(time <= 0){
+
+            clearInterval(timerInterval);
+
+            document.getElementById("result").innerText =
+                "⏰ Time Up! Answer: Piano";
+        }
+
+    },1000);
+}
+
+
+function checkAnswer(){
+
+    const answer =
+        document.getElementById("answer")
+        .value
+        .trim()
+        .toLowerCase();
+
+
+    if(answer === "piano"){
+
+        clearInterval(timerInterval);
+
+        score += 100;
+
+
+        document.getElementById("score").innerText =
+            score;
+
+
+        document.getElementById("result").innerText =
+            "🎉 Correct! +100 points";
+
+    }else{
+
+        document.getElementById("result").innerText =
+            "❌ Wrong answer — try again!";
+    }
+}
+
+
+function sendChat(){
+
+    const message =
+        document.getElementById("message")
+        .value
+        .trim();
+
+
+    if(!message) return;
+
+
+    if(socket.readyState !== WebSocket.OPEN){
+
+        alert("Not connected");
+
+        return;
+    }
+
+
+    socket.send(JSON.stringify({
+
+        type:"chat",
+
+        message:message
+
+    }));
+
+
+    document.getElementById("message").value = "";
+}
+
+
+function addChat(name,message){
+
+    const chat =
+        document.getElementById("chat");
+
+
+    const div =
+        document.createElement("div");
+
+
+    div.className = "msg";
+
+
+    div.innerText =
+        name + ": " + message;
+
+
+    chat.appendChild(div);
+
+
+    chat.scrollTop =
+        chat.scrollHeight;
+}
+
+
+document
+.getElementById("message")
+.addEventListener("keydown",function(e){
+
+    if(e.key === "Enter"){
+
+        sendChat();
+    }
+
+});
+
+
+connect();
+
+</script>
+
+</body>
+</html>
