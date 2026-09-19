@@ -1,7 +1,9 @@
 const WebSocket = require("ws");
 
-const PORT = 3000;
-const wss = new WebSocket.Server({ port: PORT });
+const PORT = process.env.PORT || 3000;
+const http = require("http");
+const server = http.createServer((req, res) => { res.writeHead(200, {"Content-Type":"text/plain"}); res.end("Puzzle Battle server running"); });
+const wss = new WebSocket.Server({ server });
 
 const rooms = new Map();
 
@@ -244,4 +246,4 @@ wss.on("connection", (ws) => {
     });
 });
 
-console.log(`🎮 Puzzle server running on port ${PORT}`);
+server.listen(PORT, "0.0.0.0", () => { console.log(`🎮 Puzzle server running on port ${PORT}`); });
