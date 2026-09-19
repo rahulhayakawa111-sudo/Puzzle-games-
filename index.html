@@ -344,8 +344,135 @@ function connect(){
         }
 
 
-        if(data.type === "game_start"){
+if(data.type === "game_start"){
 
+    document.getElementById("gameArea").style.display = "block";
+
+}
+
+if(data.type === "online_question"){
+
+    renderOnlineQuestion(data);
+
+}
+
+if(data.type === "answer_result"){
+
+    document.getElementById("result").innerText =
+        data.correct
+        ? "✅ Correct! +10 points — " + data.winner
+        : "❌ Wrong answer!";
+
+    if(data.scores){
+
+        const myId = socket._playerId;
+
+        if(myId && data.scores[myId] !== undefined){
+            document.getElementById("score").innerText =
+                data.scores[myId];
+        }
+
+    }
+
+}
+
+if(data.type === "question_timeout"){
+
+    document.getElementById("result").innerText =
+        "⏰ Time Up! Correct answer: " + data.correctAnswer;
+
+}
+
+if(data.type === "game_finished"){
+
+    document.getElementById("result").innerText =
+        "🏆 Game Complete!";
+
+}
+
+function renderOnlineQuestion(data){
+
+    document.getElementById("gameArea").style.display = "block";
+
+    document.getElementById("level").innerText = data.level;
+
+    document.getElementById("timer").innerText = data.time;
+
+    document.querySelector("#gameArea .question").innerText =
+        data.question;
+
+    document.getElementById("result").innerText = "";
+
+    document.getElementById("answer").style.display = "none";
+
+    const submitButton =
+        document.querySelector('#gameArea button[onclick="checkAnswer()"]');
+
+    if(submitButton){
+        submitButton.style.display = "none";
+    }
+
+    let oldBox = document.getElementById("onlineOptions");
+
+    if(oldBox){
+        oldBox.remove();
+    }
+
+    const box = document.createElement("div");
+
+    box.id = "onlineOptions";
+
+    box.style.marginTop = "15px";
+
+    data.options.forEach((option, index) => {
+
+        const button = document.createElement("button");
+
+        button.innerText =
+            String.fromCharCode(65 + index) + ") " + option;
+
+        button.style.display = "block";
+        button.style.width = "100%";
+        button.style.margin = "8px 0";
+
+        button.onclick = function(){
+
+            document
+                .querySelectorAll("#onlineOptions button")
+                .forEach(b => b.disabled = true);
+
+            socket.send(JSON.stringify({
+                type: "answer",
+                option: index
+            }));
+
+        };
+
+        box.appendChild(button);
+
+    });
+
+    document.getElementById("gameArea").appendChild(box);
+
+    let left = data.time;
+
+    clearInterval(window.onlineTimer);
+
+    window.onlineTimer = setInterval(function(){
+
+        left--;
+
+        document.getElementById("timer").innerText = left;
+
+        if(left <= 0){
+
+            clearInterval(window.onlineTimer);
+
+        }
+
+    },1000);
+
+}
             startLevel();
         }
 
