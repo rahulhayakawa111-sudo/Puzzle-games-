@@ -22,52 +22,52 @@ const QUESTIONS = [
     {
         question: "What has keys but cannot open locks?",
         options: ["Piano", "Door", "Car", "Clock"],
-        answer: 0
+            answer: 0,
     },
     {
         question: "What has a face and two hands but no arms or legs?",
         options: ["Clock", "Robot", "Chair", "Book"],
-        answer: 0
+            answer: 1,
     },
     {
         question: "What gets wetter the more it dries?",
         options: ["Towel", "Sponge", "Rain", "Soap"],
-        answer: 0
+            answer: 2,
     },
     {
         question: "What has many teeth but cannot bite?",
         options: ["Comb", "Dog", "Shark", "Fork"],
-        answer: 0
+            answer: 3,
     },
     {
         question: "What can travel around the world while staying in one corner?",
         options: ["Stamp", "Plane", "Sun", "Cloud"],
-        answer: 0
+            answer: 0,
     },
     {
         question: "What has a neck but no head?",
         options: ["Bottle", "Shirt", "Snake", "Tree"],
-        answer: 0
+            answer: 1,
     },
     {
         question: "What has one eye but cannot see?",
         options: ["Needle", "Camera", "Potato", "Storm"],
-        answer: 0
+            answer: 2,
     },
     {
         question: "What comes down but never goes up?",
         options: ["Rain", "Ball", "Smoke", "Bird"],
-        answer: 0
+            answer: 3,
     },
     {
         question: "What has hands but cannot clap?",
         options: ["Clock", "Person", "Glove", "Tree"],
-        answer: 0
+            answer: 1,
     },
     {
         question: "What has words but never speaks?",
         options: ["Book", "Radio", "Phone", "Person"],
-        answer: 0
+            answer: 2,
     }
 ];
 
