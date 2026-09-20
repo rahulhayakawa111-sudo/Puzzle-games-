@@ -769,7 +769,7 @@ const offlineQuestions=[
 {q:"What has legs but cannot walk?",options:["Table","Dog","Human","Horse"],answer:0},
 {q:"What has a face and two hands but no arms or legs?",options:["Clock","Book","Chair","Phone"],answer:0}
 ];
-let offlineIndex=0,offlineScoreValue=0,offlineAnswered=false,offlineTimerId=null,offflineTimeLeft=30;
+var offlineIndex=0,offlineScoreValue=0,offlineAnswered=false,offlineTimerId=null,offflineTimeLeft=30;
 function startOffline(){document.getElementById("menu").style.display="none";document.getElementById("roomArea").style.display="none";document.getElementById("gameArea").style.display="none";document.getElementById("offlineArea").style.display="block";renderOfflineQuestion();}function renderOfflineQuestion(){
     try {
         clearInterval(offlineTimerId);
