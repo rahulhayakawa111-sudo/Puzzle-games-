@@ -66,7 +66,7 @@ const QUESTIONS = [
     },
     {
         question: "What has words but never speaks?",
-        options: ["Book", "Radio", "Phone", "Person"],
+        options: ["Piano", "Book", "Radio", "Phone"],
             answer: 0,
     }
 ];
