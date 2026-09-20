@@ -27,17 +27,17 @@ const QUESTIONS = [
     {
         question: "What has a face and two hands but no arms or legs?",
         options: ["Clock", "Robot", "Chair", "Book"],
-            answer: 1,
+            answer: 0,
     },
     {
         question: "What gets wetter the more it dries?",
         options: ["Towel", "Sponge", "Rain", "Soap"],
-            answer: 2,
+            answer: 0,
     },
     {
         question: "What has many teeth but cannot bite?",
         options: ["Comb", "Dog", "Shark", "Fork"],
-            answer: 3,
+            answer: 0,
     },
     {
         question: "What can travel around the world while staying in one corner?",
@@ -47,27 +47,27 @@ const QUESTIONS = [
     {
         question: "What has a neck but no head?",
         options: ["Bottle", "Shirt", "Snake", "Tree"],
-            answer: 1,
+            answer: 0,
     },
     {
         question: "What has one eye but cannot see?",
         options: ["Needle", "Camera", "Potato", "Storm"],
-            answer: 2,
+            answer: 0,
     },
     {
         question: "What comes down but never goes up?",
         options: ["Rain", "Ball", "Smoke", "Bird"],
-            answer: 3,
+            answer: 1,
     },
     {
         question: "What has hands but cannot clap?",
         options: ["Clock", "Person", "Glove", "Tree"],
-            answer: 1,
+            answer: 0,
     },
     {
         question: "What has words but never speaks?",
         options: ["Book", "Radio", "Phone", "Person"],
-            answer: 2,
+            answer: 0,
     }
 ];
 
