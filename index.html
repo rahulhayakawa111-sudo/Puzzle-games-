@@ -336,13 +336,13 @@ function connect(){
         if(data.type === "chat"){
 
             addChat(
-                data.player,
+                data.name,
                 data.message
             );
         }
 
 
-if(data.type === "game_start"){
+if(data.type === "game_started"){
 
     document.getElementById("gameArea").style.display = "block";
 
