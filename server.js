@@ -20,7 +20,7 @@ const MODES = {
 
 const QUESTIONS = [
     {
-        question: "What has keys but cannot open locks?",
+        question: "What has words but never speaks?",
         options: ["Piano", "Door", "Car", "Clock"],
             answer: 0,
     },
