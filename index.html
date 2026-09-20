@@ -770,7 +770,71 @@ const offlineQuestions=[
 {q:"What has a face and two hands but no arms or legs?",options:["Clock","Book","Chair","Phone"],answer:0}
 ];
 let offlineIndex=0,offlineScoreValue=0,offlineAnswered=false,offlineTimerId=null,offflineTimeLeft=30;
-function startOffline(){document.getElementById("menu").style.display="none";document.getElementById("roomArea").style.display="none";document.getElementById("gameArea").style.display="none";document.getElementById("offlineArea").style.display="block";renderOfflineQuestion();}function renderOfflineQuestion(){clearInterval(offlineTimerId);offlineAnswered=false;offlineTimeLeft=30;const q=offlineQuestions[offlineIndex];document.getElementById("offlineLevel").innerText=offlineIndex+1;document.getElementById("offlineTimer").innerText=30;document.getElementById("offlineQuestion").innerText=q.q;document.getElementById("offlineResult").innerText="";const box=document.getElementById("offlineOptions");box.innerHTML="";q.options.forEach((option,i)=>{const b=document.createElement("button");b.innerText=String.fromCharCode(65+i)+") "+option;b.onclick=()=>offlineAnswer(i);box.appendChild(b)});offlineTimerId=setInterval(()=>{offlineTimeLeft--;document.getElementById("offlineTimer").innerText=offlineTimeLeft;if(offlineTimeLeft<=0){clearInterval(offlineTimerId);offlineAnswered=true;document.getElementById("offlineResult").innerText="⏰ Time Up! Correct answer: "+q.options[q.answer]}},1000)}function offlineAnswer(selected){if(offlineAnswered)return;offlineAnswered=true;clearInterval(offlineTimerId);const q=offlineQuestions[offlineIndex];if(selected===q.answer){offlineScoreValue+=10;document.getElementById("offlineScore").innerText=offlineScoreValue;document.getElementById("offlineResult").innerText="✅ Correct! +10"}else{document.getElementById("offlineResult").innerText="❌ Wrong! Correct answer: "+q.options[q.answer]}}function offlineNext(){if(!offlineAnswered){document.getElementById("offlineResult").innerText="⚠️ Pehle answer select karo!";return}if(offlineIndex>=offlineQuestions.length-1){document.getElementById("offlineResult").innerText="🏆 Game Complete! Final Score: "+offlineScoreValue;return}offlineIndex++;renderOfflineQuestion()}function offlineBack(){clearInterval(offlineTimerId);document.getElementById("offlineArea").style.display="none";document.getElementById("menu").style.display="block"}</script>
+function startOffline(){document.getElementById("menu").style.display="none";document.getElementById("roomArea").style.display="none";document.getElementById("gameArea").style.display="none";document.getElementById("offlineArea").style.display="block";renderOfflineQuestion();}function renderOfflineQuestion(){
+    try {
+        clearInterval(offlineTimerId);
+
+        offlineAnswered = false;
+        offlineTimeLeft = 30;
+
+        const q = offlineQuestions[offlineIndex];
+
+        if (!q) {
+            document.getElementById("offlineQuestion").innerText =
+                "❌ Question load nahi hua";
+            return;
+        }
+
+        document.getElementById("offlineLevel").innerText =
+            offlineIndex + 1;
+
+        document.getElementById("offlineTimer").innerText = "30";
+
+        document.getElementById("offlineQuestion").innerText =
+            q.q;
+
+        document.getElementById("offlineResult").innerText = "";
+
+        const box = document.getElementById("offlineOptions");
+        box.innerHTML = "";
+
+        q.options.forEach(function(option, i) {
+            const b = document.createElement("button");
+
+            b.innerText =
+                String.fromCharCode(65 + i) + ") " + option;
+
+            b.onclick = function() {
+                offlineAnswer(i);
+            };
+
+            box.appendChild(b);
+        });
+
+        offlineTimerId = setInterval(function() {
+            offlineTimeLeft--;
+
+            document.getElementById("offlineTimer").innerText =
+                offlineTimeLeft;
+
+            if (offlineTimeLeft <= 0) {
+                clearInterval(offlineTimerId);
+
+                offlineAnswered = true;
+
+                document.getElementById("offlineResult").innerText =
+                    "⏰ Time Up! Correct answer: " +
+                    q.options[q.answer];
+            }
+        }, 1000);
+
+    } catch (error) {
+        document.getElementById("offlineQuestion").innerText =
+            "❌ Error: " + error.message;
+    }
+}
+
+function offlineAnswer(selected){if(offlineAnswered)return;offlineAnswered=true;clearInterval(offlineTimerId);const q=offlineQuestions[offlineIndex];if(selected===q.answer){offlineScoreValue+=10;document.getElementById("offlineScore").innerText=offlineScoreValue;document.getElementById("offlineResult").innerText="✅ Correct! +10"}else{document.getElementById("offlineResult").innerText="❌ Wrong! Correct answer: "+q.options[q.answer]}}function offlineNext(){if(!offlineAnswered){document.getElementById("offlineResult").innerText="⚠️ Pehle answer select karo!";return}if(offlineIndex>=offlineQuestions.length-1){document.getElementById("offlineResult").innerText="🏆 Game Complete! Final Score: "+offlineScoreValue;return}offlineIndex++;renderOfflineQuestion()}function offlineBack(){clearInterval(offlineTimerId);document.getElementById("offlineArea").style.display="none";document.getElementById("menu").style.display="block"}</script>
 
 </body>
 </html>
